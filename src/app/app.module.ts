@@ -21,8 +21,8 @@ import { RoundedCornersComponent } from './core/basic/rounded-corners/rounded-co
 import { CropComponent } from './core/crop/crop/crop.component';
 import { DrawingComponent } from './core/drawing/drawing.component';
 import { RenderBrushComponent } from './core/render-brush/render-brush.component';
-import { FiltersComponent } from './filters/filters.component';
 import { FilterControllerComponent } from './core/filters/filter-controller/filter-controller.component';
+import {GlobalsService} from './services/globals.service';
 
 
 @NgModule({
@@ -36,14 +36,13 @@ import { FilterControllerComponent } from './core/filters/filter-controller/filt
     CropComponent,
     DrawingComponent,
     RenderBrushComponent,
-    FiltersComponent,
     FilterControllerComponent
   ],
   imports: [
     BrowserModule,
     MatDialogModule
   ],
-  providers: [CanvasService, DataService, KeybindsService, WindowRef, HistoryService, SimpleShapesService, FiltersService],
+  providers: [CanvasService, DataService, KeybindsService, WindowRef, HistoryService, SimpleShapesService, FiltersService, GlobalsService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

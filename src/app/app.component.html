@@ -1,13 +1,13 @@
 <div>
   <section id="right-panels">
-    <section id="objects" class="md-whiteframe-z1" ng-controller="ObjectsPanelController">
+    <section id="objects" class="md-whiteframe-z1" objects-panel-controller>
       <h3 ed-toggle-panel-visibility="objects"><span>Layers</span><i class="mdi mdi-expand-less"></i></h3>
       <div class="scrollbar-wrapper" ed-pretty-scrollbar ed-scroll-axis="y">
         <ul class="objects-panel list-unstyled" ui-sortable="sortableOptions" ng-model="objects">
-          <li class="object panel-item" ng-repeat="object in objects" ng-click="setAsActive(object)" ng-if="!object.ignore">
-            <i class="mdi mdi-remove-red-eye toggle-visibility" ng-class="{ 'not-visible': !object.visible }" ng-click="toggleVisibility(object); $event.stopPropagation();"></i>
+          <li class="object panel-item" ng-repeat="object in objects" ng-click="setAsActive(object)" *ngIf="!object.ignore">
+            <i class="mdi mdi-remove-red-eye toggle-visibility" ngClass="{ 'not-visible': !object.visible }" ng-click="toggleVisibility(object); $event.stopPropagation();"></i>
             <i class="mdi mdi-delete delete-object" ng-click="deleteObject(object); $event.stopPropagation();"></i>
-            <i class="mdi mdi-lock-outline lock-object" ng-class="{ 'not-locked': !object.locked }" ng-click="toggleLock(object); $event.stopPropagation();"></i>
+            <i class="mdi mdi-lock-outline lock-object" ngClass="{ 'not-locked': !object.locked }" ng-click="toggleLock(object); $event.stopPropagation();"></i>
             {{ spacify(object.name) || spacify(object.type) }}
           </li>
           <li ng-if="!canvas.fabric._objects.length" class="text-center"><h4>No layers yet.</h4></li>

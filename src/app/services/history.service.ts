@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import {CanvasService} from './canvas.service';
 import {DataService} from './data.service';
+import {GlobalsService} from './globals.service';
 
 @Injectable()
 export class HistoryService {
 
-  constructor(private canvasService: CanvasService, private dataService: DataService) { }
+  constructor(private canvasService: CanvasService, private globals: GlobalsService) { }
 
   all:any = [];
 
@@ -57,7 +58,7 @@ export class HistoryService {
   };
 
   load (item) {
-    this.dataService.isLoading();
+    this.globals.isLoading();
 
     //if we get passed a name, fetch a matching history item
     if (item instanceof String) {
@@ -65,7 +66,7 @@ export class HistoryService {
     }
 
     if ( ! item) {
-      return this.dataService.isNotLoading();
+      return this.globals.isNotLoading();
     }
 
     setTimeout(function() {
@@ -94,9 +95,9 @@ export class HistoryService {
 
         this.canvasService.fabric.renderAll();
         this.canvasService.fabric.calcOffset();
-        this.dataService.isNotLoading();
+        this.globals.isNotLoading();
         this.canvasService.fitToScreen();
-        this.dataService.$emit('history.loaded');
+        // this.dataService.$emit('history.loaded');
       });
     }, 30);
   }

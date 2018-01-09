@@ -1,14 +1,52 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
+import {EventEmitter, Injectable, OnInit, Output} from '@angular/core';
 import {DataService} from './data.service';
 import {KeybindsService} from './keybinds.service';
 import {WindowRef} from '../utility/window-ref';
+import {GlobalsService} from './globals.service';
 
 declare var $: any;
 
 @Injectable()
-export class CanvasService {
+export class CanvasService implements OnInit {
 
-  constructor(private dataService: DataService, private keybinds: KeybindsService, private windowRef: WindowRef) { }
+  constructor( private keybinds: KeybindsService, private windowRef: WindowRef,
+              private globals: GlobalsService) { }
+
+  ngOnInit() {
+    //open corresponding tab in left panel when user selects an object
+    this.fabric.on('object:selected', (e) => {
+      if (e.target.name == 'text') {
+        this.globals.activeTab = 'text';
+      } else if (e.target.name == 'sticker' && this.globals.activeTab !== 'stickers') {
+        this.globals.activeTab = 'stickers';
+      } else if (e.target.name && this.globals.activeTab !== 'simple-shapes') {
+        for (let i = 0; i < this.globals.simpleShapesAvailable.length; i++) {
+          let shape = this.globals.simpleShapesAvailable[i];
+
+          if (shape.name === e.target.name && this.globals.activeTab !== 'simple-shapes') {
+            this.globals.simpleShapesSelected = shape;
+            this.globals.activeTab = 'simple-shapes';
+          }
+        }
+      }
+
+      window.setTimeout(() => {});
+    });
+
+    //Close object panel when object is de-selected
+    this.fabric.on('selection:cleared', function() {
+      window.setTimeout(() => {});
+    });
+
+    //deselect all objects when clicking outside canvas
+    $('#viewport').on('click', function(e) {
+      if (e.target.id === 'viewport') {
+        window.setTimeout(() => {
+          this.fabric.deactivateAll().renderAll();
+        });
+      }
+    });
+  }
 
   @Output() canvasInit = new EventEmitter();
   @Output() canvasOpenedNew = new EventEmitter();
@@ -59,18 +97,18 @@ export class CanvasService {
     this.offset = false;
     this.element = false;
     this.currentZoom = 1;
-    this.dataService.editorCustomActions = {};
+    this.globals.editorCustomActions = {};
     $(this.window).off('resize');
     this.keybinds.destroy();
   };
 
-  start(url) {
+  start(url?) {
     this.element = document.getElementById('canvas');
     this.fabric = new this.fabric.Canvas('canvas');
     this.ctx = this.fabric.getContext('2d');
     this.container = $('.canvas-container');
     this.viewport = document.getElementById('viewport');
-    this.dataService.editorCustomActions = {};
+    this.globals.editorCustomActions = {};
 
     this.fabric.selection = false;
     this.fabric.renderOnAddRemove = false;
@@ -80,19 +118,19 @@ export class CanvasService {
     this.fabric.transparentCorners = false;
 
     if (!url) {
-      url = this.dataService.getParam('url');
+      url = this.globals.getParam('url');
     }
 
     if (url) {
       this.loadMainImage(url);
-      this.dataService.started = true;
-    } else if (this.dataService.getParam('blankCanvasSize')) {
-      let size = this.dataService.getParam('blankCanvasSize');
+      this.globals.started = true;
+    } else if (this.globals.getParam('blankCanvasSize')) {
+      let size = this.globals.getParam('blankCanvasSize');
       this.openNew(size.width, size.height, 'newCanvas');
-      this.dataService.started = true;
+      this.globals.started = true;
     }
 
-    // if ( !this.dataService.started && !this.dataService.isIntegrationMode && ! this.dataService.delayEditorStart) {
+    // if ( !this.globals.started && !this.globals.isIntegrationMode && ! this.globals.delayEditorStart) {
     //   $mdDialog.show({
     //     template: $('#main-image-upload-dialog-template').html(),
     //     controller: 'TopPanelController',
@@ -114,8 +152,8 @@ export class CanvasService {
 
     this.keybinds.init(this.fabric);
 
-    if (this.dataService.getParam('onLoad')) {
-      this.dataService.getParam('onLoad')(this.viewport, this, this.window);
+    if (this.globals.getParam('onLoad')) {
+      this.globals.getParam('onLoad')(this.viewport, this, this.window);
     }
   };
 
@@ -156,7 +194,7 @@ export class CanvasService {
       this.fabric.renderAll();
       this.fabric.calcOffset();
       this.fitToScreen();
-      this.dataService.$emit('history.loaded');
+      // this.dataService.$emit('history.loaded');
 
       callback && callback(design);
     });
@@ -236,9 +274,9 @@ export class CanvasService {
         this.fitToScreen();
       }
 
-      this.dataService.$apply(function() {
-        this.dataService.$emit('editor.mainImage.loaded');
-      });
+      // this.globals.$apply(function() {
+      //   this.globals.$emit('editor.mainImage.loaded');
+      // });
 
       if (callback) {
         callback();

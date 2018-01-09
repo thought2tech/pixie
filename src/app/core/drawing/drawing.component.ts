@@ -12,17 +12,17 @@ import {HistoryService} from '../../services/history.service';
 })
 export class DrawingComponent implements OnInit {
 
+
   constructor(private canvas: CanvasService, private drawing: DrawingService, private dataService: DataService,
               private windowRef: WindowRef, private history: HistoryService) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   window = this.windowRef.nativeWindow;
-  window.fb = this.canvas.fabric;
+  // window.fb = this.canvas.fabric;
 
   changeBrush (brush, $event) {
-    this.openPanel('drawing', $event);
+    // openPanel('drawing', $event);
 
     if ( ! this.drawing.isEnabled) {
       this.drawing.enable();

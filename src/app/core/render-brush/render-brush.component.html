@@ -1,4 +1,4 @@
-<div *ngFor="brush of availableBrushes" ngClass="{ active: drawing.activeBrushName == brush }" class="brush animated-in-sequence" (click)="changeBrush(brush)">
-  <img class="img-responsive" ng-src="assets/images/brushes/{{brush}}.png"/>
+<div *ngFor="let brush of availableBrushes" ngClass="{ active: drawing.activeBrushName == brush }" class="brush animated-in-sequence" (click)="changeBrush(brush)">
+  <img class="img-responsive" src="assets/images/brushes/{{brush}}.png"/>
   <div class="brush-name">{{ brush }}</div>
 </div>

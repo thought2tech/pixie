@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import {DataService} from './data.service';
 import {CanvasService} from './canvas.service';
+import {GlobalsService} from './globals.service';
+
+declare var fabric: any;
 
 @Injectable()
 export class FiltersService {
 
-  constructor(private dataService: DataService, private canvas: CanvasService) { }
+  constructor(private canvas: CanvasService, private globals: GlobalsService) { }
 
   appliedFilters:any;
   all= [
@@ -92,7 +95,7 @@ export class FiltersService {
       return this.removeFilter(filter);
     }
 
-    this.dataService.isLoading();
+    this.globals.isLoading();
     this.markAsApplied(filter.name);
 
     //need to use timeout to display loading spinner properly
@@ -106,14 +109,14 @@ export class FiltersService {
 
       this.history.add('filter: '+(filter.displayName || filter.name), 'brightness-6');
       this.lastAppliedFilter = filter;
-      this.dataService.isNotLoading();
+      this.globals.isNotLoading();
     }, 30);
   };
 
   removeFilter(filter) {
-    if ( ! this.filterExists(filter)) return;
+    if ( ! this.filterExists(filter)) { return };
 
-    this.dataService.isLoading();
+    this.globals.isLoading();
     this.unmarkAsApplied(filter.name);
     let $this = this;
 
@@ -130,73 +133,69 @@ export class FiltersService {
       });
 
       this.lastAppliedFilter = false;
-      this.dataService.isNotLoading();
+      this.globals.isNotLoading();
     }, 30);
-  },
+  };
 
-  applyValue: function(filterName, optionName, optionValue) {
-    $rootScope.isLoading();
+  applyValue(filterName, optionName, optionValue) {
+    this.globals.isLoading();
+    let $this = this;
 
     setTimeout(function() {
-      canvas.fabric.forEachObject(function(obj) {
+      $this.canvas.fabric.forEachObject(function(obj) {
         if (obj.applyFilters) {
-          for (var i = 0; i < obj.filters.length; i++) {
-            var filter = obj.filters[i];
+          for (let i = 0; i < obj.filters.length; i++) {
+            let filter = obj.filters[i];
 
             if (filter.type.toLowerCase() === filterName.toLowerCase()) {
               filter[optionName] = optionValue;
-              obj.applyFilters(canvas.fabric.renderAll.bind(canvas.fabric));
+              obj.applyFilters($this.canvas.fabric.renderAll.bind($this.canvas.fabric));
             }
           }
         }
       });
 
-      $rootScope.isNotLoading();
+      $this.globals.isNotLoading();
     }, 30);
-  },
+  }
 
-  filterAlreadyApplied: function(name) {
-    return this.appliedFilters.indexOf(name) !== -1
-  },
+  filterAlreadyApplied(name) {
+    return this.appliedFilters.indexOf(name) !== -1;
+  }
 
-  markAsApplied: function(name) {
+  markAsApplied(name) {
     if (this.appliedFilters.indexOf(name) === -1) {
       this.appliedFilters.push(name);
     }
-  },
+  }
 
-  unmarkAsApplied: function(name) {
-    for (var i = 0; i < this.appliedFilters.length; i++) {
+  unmarkAsApplied(name) {
+    for (let i = 0; i < this.appliedFilters.length; i++) {
       if (this.appliedFilters[i] === name) {
         this.appliedFilters.splice(i, 1);
       }
     }
-  },
+  }
 
-  filterExists: function(filter) {
+  filterExists(filter) {
     return fabric.Image.filters[fabric.util.string.capitalize(filter.uses || filter.name, true)] !== undefined;
-  },
+  }
 
-  getFilter: function(filter) {
-    var newFilter;
+  getFilter(filter) {
+    let newFilter;
 
     if (filter.uses) {
       newFilter = new fabric.Image.filters[fabric.util.string.capitalize(filter.uses, true)]({ matrix: filter.matrix });
-    }
-
-    else {
-      var options = {};
-
-      for (var key in filter.options) {
+    } else {
+      let options = {};
+      for (let key in filter.options) {
         options[key] = filter.options[key].current;
       }
-
       newFilter = new fabric.Image.filters[fabric.util.string.capitalize(filter.name, true)](options);
     }
 
     newFilter.name = filter.name;
 
     return newFilter;
-  };
-
+  }
 }
